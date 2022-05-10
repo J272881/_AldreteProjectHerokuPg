@@ -1,0 +1,41 @@
+<div class="form-group row">
+    <label class="col-form-label col-sm-2" for="cusId"> ID</label>
+    <div class="col-sm-7">
+        <input autofocus class="form-control" name="cusId" value="<%= model.cusId %>" required />
+    </div>
+</div>
+
+<div class="form-group row">
+    <label class="col-form-label col-sm-2" for="cusFname">First Name</label>
+    <div class="col-sm-7">
+        <input class="form-control" name="cusFname" value="<%= model.cusFname %>" required/>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label class="col-form-label col-sm-2" for="cusLname">Last Name</label>
+    <div class="col-sm-7">
+        <input class="form-control" name="cusLname" value="<%= model.cusLname %>" required/>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label class="col-form-label col-sm-2" for="cusState">State</label>
+    <div class="col-sm-7">
+        <input class="form-control" name="cusState" maxlength="2" pattern="[a-zA-Z]{2}" value="<%= model.cusState %>"  />
+    </div>
+</div>
+
+<div class="form-group row">
+    <label class="col-form-label col-sm-2" for="cusSalesYTD">Sales YTD</label>
+    <div class="col-sm-7">
+        <input class="form-control" name="cusSalesYTD" value="<%= model.cusSalesYTD %>" />
+    </div>
+</div>
+
+<div class="form-group row">
+    <label class="col-form-label col-sm-2" for="cusSalesPrev">Previous Years Sales</label>
+    <div class="col-sm-7">
+        <input class="form-control" name="cusSalesPrev" value="<%= model.cusSalesPrev %>" />
+    </div>
+</div>

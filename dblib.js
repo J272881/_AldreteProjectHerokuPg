@@ -1,3 +1,12 @@
+require("dotenv").config();
+const { Pool } = require('pg');
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
+
 const getTotalRecords = () => {
     sql = "SELECT COUNT(*) FROM customer";
     return pool.query(sql)
@@ -9,85 +18,130 @@ const getTotalRecords = () => {
         })
         .catch(err => {
             return {
-                msg: `Error: ${err.message}`
+                msg: `Error ${err.message}`
             }
         });
 };
+
 const insertCustomer = (customer) => {
-    // Will accept either a customer array or customer object
     if (customer instanceof Array) {
         params = customer;
     } else {
         params = Object.values(customer);
     };
-
-    const sql = `INSERT INTO customer (cust_id, cust_fname, cust_lname, cust_state, cust_sales_ytd, cust_prev_sales)
-                 VALUES ($1, $2, $3, $4, $5, %6)`;
-
+    const sql = `INSERT INTO customer (cusId, cusFname, cusLname, cusState, cusSalesYTD, cusSalesPrev)
+                 VALUES ($1, $2, $3, $4, $5, $6)`;
     return pool.query(sql, params)
         .then(res => {
             return {
-                trans: "success", 
-                msg: `Customer id ${params[0]} successfully inserted`
+                trans: "success",
+                msg: `customer id ${params[0]} successfully inserted`
             };
         })
         .catch(err => {
             return {
-                trans: "fail", 
+                trans: "fail",
                 msg: `Error on insert of customer id ${params[0]}.  ${err.message}`
             };
         });
 };
 
-const findCustomers = (customer) => {
-    // Will build query based on data provided from the form
-    //  Use parameters to avoid sql injection
+const scust = () => {
+    const sql = "SELECT * FROM customer ORDER BY cusLname asc";
+    return pool.query(sql) 
+    .then(report => {
+        return {
+            trans:"success",
+            obl: report.rows
+        }
+    })
+    .catch(err => {
+        return{
+            trans: "fail",
+            msg: `${err.message}`
+        }
+    });
+};
 
-    // Declare variables
+const ssales = () => {
+    const sql = "SELECT * FROM customer ORDER BY cusSalesYTD desc";
+    return pool.query(sql)
+    .then(report => {
+        return {
+            trans: "success",
+            obs: report.rows
+        }
+    })
+    .catch(err => {
+        return{
+            trans: "fail",
+            msg: `${err.message}`
+        }
+    });
+};
+
+const random = () => {
+    const sql = "SELECT * FROM customer ORDER BY RANDOM() LIMIT 3";
+    return pool.query (sql)
+    .then(report => {
+        return {
+            trans: "success",
+            obr: report.rows
+        }
+    })
+    .catch(err => {
+        return{
+            trans: "fail",
+            msg: `${err.message}`
+        }
+    });
+};
+
+const findCustomer = (customer) => {
+
     var i = 1;
     params = [];
     sql = "SELECT * FROM customer WHERE true";
 
     // Check data provided and build query as necessary
-    if (customer.cust_id !== "") {
-        params.push(parseInt(customer.cust_id));
-        sql += ` AND cust_id = $${i}`;
+    if (customer.cusId !== "") {
+        params.push(parseInt(customer.cusId));
+        sql += ` AND cusId = $${i}`;
         i++;
     };
-    if (customer.cust_fname !== "") {
-        params.push(`${customer.cust_fname}%`);
-        sql += ` AND UPPER(cust_fname) LIKE UPPER($${i})`;
+    if (customer.cusFname !== "") {
+        params.push(`${customer.cusFname}%`);
+        sql += ` AND UPPER(cusFname) LIKE UPPER($${i})`;
         i++;
     };
-    if (customer.cust_lname !== "") {
-        params.push(`${customer.cust_lname}%`);
-        sql += ` AND UPPER(cust_lname) LIKE UPPER($${i})`;
+    if (customer.cusLname !== "") {
+        params.push(`${customer.cusLname}%`);
+        sql += ` AND UPPER(cusLname) LIKE UPPER($${i})`;
         i++;
     };
-    if (customer.cust_state !== "") {
-        params.push(`${customer.cust_state}%`);
-        sql += ` AND UPPER(cust_state) LIKE UPPER($${i})`;
+    if (customer.cusState !== "") {
+        params.push(`${customer.cusState}%`);
+        sql += ` AND UPPER(cusState) LIKE UPPER($${i})`;
         i++;
     };
-    if (customer.cust_sales_ytd !== "") {
-        params.push(parseFloat(customer.cust_sales_ytd));
-        sql += ` AND cust_sales_ytd >= $${i}`;
+    if (customer.cusSalesYTD !== "") {
+        params.push(parseFloat(customer.cusSalesYTD));
+        sql += ` AND cusSalesYTD >= $${i}`;
         i++;
     };
-    if (customer.cust_prev_sales !== "") {
-        params.push(parseFloat(customer.cust_prev_sales));
-        sql += ` AND cust_prev_sales >= $${i}`;
+    if (customer.cusSalesPrev !== "") {
+        params.push(parseFloat(customer.cusSalesPrev));
+        sql += ` AND cusSalesPrev >= $${i}`;
         i++;
     };
 
-    sql += ` ORDER BY cust_id`;
-    // for debugging
-     console.log("sql: " + sql);
-     console.log("params: " + params);
+    sql += ` ORDER BY cusId`;
+    console.log("sql: " + sql);
+    console.log("params: " + params);
 
     return pool.query(sql, params)
         .then(result => {
-            return { 
+            return {
                 trans: "success",
                 result: result.rows
             }
@@ -100,9 +154,9 @@ const findCustomers = (customer) => {
         });
 };
 
-// Add towards the bottom of the page
-module.exports.findCustomers = findCustomers;
-
-module.exports.getTotalRecords = getTotalRecords;
-// Add this at the bottom
+module.exports.findCustomer = findCustomer;
 module.exports.insertCustomer = insertCustomer;
+module.exports.getTotalRecords = getTotalRecords;
+module.exports.scust = scust;
+module.exports.ssales = ssales;
+module.exports.random = random;

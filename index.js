@@ -83,6 +83,80 @@ app.post("/manage", async (req, res) => {
         });
 });
 
+//get edit
+app.get("/edit/:id", (req, res) => {
+    const id = req.params.id;
+    const sql = "SELECT * FROM customer WHERE cusId = $1";
+    pool.query(sql, [id], (err, result) => {
+        // if (err) ...
+        res.render("edit", {
+            type: "get",
+            model: result.rows[0]
+        });
+    });
+});
+
+//post edit
+app.post("/edit/:id", async (req, res) => {
+    const id = req.params.id;
+    const customer = [req.body.cusFname, req.body.cusLname, req.body.cusState, req.body.cusSalesYTD, req.body.cusSalesPrev, id];
+    const sql = "UPDATE customer SET cusFname = $1, cusLname = $2, cusState = $3, cusSalesYTD = $4, cusSalesPrev = $5 WHERE (cusId = $6)";
+    const model = req.body;
+    const count = pool.query(sql, customer, (err, result) => {
+        if (err) {
+            return console.error(err.message);
+        }
+        else {
+            console.log("Rows updated : ", result.rowCount);
+            res.render("edit", {
+                model: model,
+                type: "POST",
+                count: result.rowCount
+            });
+        }
+        
+    });
+});
+
+//get delete
+app.get("/delete/:id", (req, res) => {
+    const id = req.params.id;
+    const sql = "SELECT * FROM customer WHERE cusId = $1";
+    pool.query(sql, [id], (err, result) => {
+        if (err) {
+            return console.error(err, message);
+        }
+        // console.log(result.row[0]);
+        res.render("delete", {
+            model: result.rows[0],
+            type: "get"
+        });
+    });
+});
+
+//post delete
+app.post("/delete/:id", async (req, res) => {
+    const id = req.params.id;
+    const model = req.body;
+    const sql = "DELETE FROM customer WHERE cusId = $1";
+    try {
+        const remove = await pool.query(sql, [id]);
+        res.render("delete", {
+            model: model,
+            remove: remove.rowCount,
+            type: "POST"
+        });
+
+    } catch (err) {
+        res.render("delete", {
+            model: model,
+            remove: err.message,
+            type: "POST"
+        });
+        console.log(err.message);
+    }
+    // console.log("This is a test", remove);
+});
 
 //get create
 app.get("/customers", async (req, res) => {
@@ -125,62 +199,11 @@ app.post("/customers", async (req, res) => {
 });
 
 
-// GET /edit/5
-app.get("/edit/:id", (req, res) => {
-    const id = req.params.id;
-    const sql = "SELECT * FROM customer WHERE cusId = $1";
-    pool.query(sql, [id], (err, result) => {
-        // if (err) ...
-        res.render("edit", {
-            type: "get",
-            model: result.rows[0]
-        });
-    });
-});
-
-//post edit
-app.post("/edit/:id", async (req, res) => {
-    const id = req.params.Id;
-    const customer = [req.body.cusfname, req.body.cuslname, req.body.cusstate, req.body.cussalesytd, req.body.cussalesprev, id];
-    const sql = "UPDATE customer SET cusFname = $1, cusLname = $2, cusState = $3, cusSalesYTD = $4, cusSalesPrev = $5 WHERE (cusId = $6)";
-    const model = req.body;
-    const count = pool.query(sql, customer, (err, result) => {
-        if (err) {
-            return console.error(err.message);
-        }
-        else {
-            console.log("Rows updated : ", result.rowCount);
-            res.render("edit", {
-                model: model,
-                type: "POST",
-                count: result.rowCount
-            });
-        }
-        
-    });
-});
-
-//get delete
-app.get("/delete/:id", (req, res) => {
-    const id = req.params.id;
-    const sql = "SELECT * FROM customer WHERE cusid = $1";
-    pool.query(sql, [id], (err, result) => {
-        if (err) {
-            return console.error(err, message);
-        }
-        // console.log(result.row[0]);
-        res.render("delete", {
-            model: result.rows[0],
-            type: "get"
-        });
-    });
-});
-
 //post delete
 app.post("/delete/:id", async (req, res) => {
     const id = req.params.id;
     const model = req.body;
-    const sql = "DELETE FROM customer WHERE cusid = $1";
+    const sql = "DELETE FROM customer WHERE cusId = $1";
     try {
         const remove = await pool.query(sql, [id]);
         res.render("delete", {
@@ -289,7 +312,7 @@ app.post("/export", (req, res) => {
         } else {
             var output = "";
             result.rows.forEach(customer => {
-                output += `${customer.cusId},${customer.cusFname},${customer.cusLname},${customer.cusState},${customer.cusSalesYTD},${customer.cusSalesPrev},\r\n`;
+                output += `${customer.cusid},${customer.cusfname},${customer.cuslname},${customer.cusstate},${customer.cussalesytd},${customer.cussalesprev},\r\n`;
             });
             res.header("Content-Type", "text/csv");
             res.attachment("export.txt");

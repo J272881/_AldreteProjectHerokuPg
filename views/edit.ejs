@@ -2,7 +2,7 @@
 
 <h1>Customer Update</h1>
 
-<form action="/edit/<%= model.cusId %>" method="post">
+<form action="/edit/<%= model.cusid %>" method="post">
     <div class="form-horizontal">
 
         <%- include("_editor") -%>
@@ -15,4 +15,16 @@
     </div>
 </form>
 
+
+
 <%- include("_footer") -%>
+<% if(type==="POST" ) { %>
+    <% if (count===1) {%>
+        <h3>Customer Updated Successfully!</h3>
+        <% } else { %>
+            <h3>Error!</h3>
+            <p>
+                <%= count %>
+            </p>
+        <%} %>
+  <% } %>
